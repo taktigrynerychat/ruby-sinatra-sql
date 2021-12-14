@@ -1,9 +1,18 @@
 require 'rake'
 require 'dotenv/tasks'
+require 'sequel'
+require 'sequel/extensions/seed'
+
+DB = Sequel.connect(
+  adapter: :postgres,
+  database: 'sinatra_seq_dev',
+  host: 'localhost',
+  password: 'password',
+  user: 'sinatra_admin',
+  max_connections: 10,
+)
 
 namespace :db do
-
-  require 'sequel'
   Sequel.extension :migration
   environment = ENV['RACK_ENV'] || 'development'
   ENV['DATABASE'] = 'sinatra_seq_dev' if environment == 'development'
@@ -60,4 +69,13 @@ namespace :db do
     Sequel::Migrator.run(db, migrations_directory)
     Rake::Task['db:version'].execute
   end
+
+  desc "Perform rollback to specified target o#r full rollback as default"
+  task :seed do
+    puts 'seed task running'
+    Sequel::Seed.setup :development # Set the environment
+    Sequel.extension :seed # Load the extension
+    Sequel::Seeder.apply(db, './db/seeds') # Apply the seeds/fixtures
+  end
+
 end
