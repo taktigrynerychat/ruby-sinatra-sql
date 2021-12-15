@@ -16,3 +16,4 @@ gem 'rack'
 gem 'rake'
 
 gem 'dotenv'
+gem 'multi_json'
